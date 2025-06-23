@@ -1,4 +1,4 @@
-# Our Cool Project
+# Charged
 
 *Short description what the project is about*
 
