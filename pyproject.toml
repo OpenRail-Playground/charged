@@ -1,0 +1,18 @@
+[project]
+name = "h4r-battery-monitoring"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "ipykernel>=6.29.5",
+    "nbstripout>=0.8.1",
+    "pre-commit>=4.2.0",
+    "pre-commit-hooks>=5.0.0",
+    "python-dotenv>=1.1.0",
+]
+
+[dependency-groups]
+dev = [
+    "snowflake-snowpark-python[pandas]>=1.33.0",
+]
