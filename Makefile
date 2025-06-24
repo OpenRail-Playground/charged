@@ -20,6 +20,3 @@ notebook:
 
 strip:
 	find . -name '*.ipynb' -exec uv run nbstripout {} +
-
-dashboard:
-	uv run streamlit run streamlit/dashboard.py
