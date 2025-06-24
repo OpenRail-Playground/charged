@@ -13,7 +13,7 @@ def render():
     )
 
     st.bar_chart(
-        ordered_df, x="DATE", y="count", x_label="Number of Errors", y_label="Date"
+        ordered_df, x="DATE", y="count", x_label="Date", y_label="Number of Errors"
     )
 
     st.write(ordered_df)
