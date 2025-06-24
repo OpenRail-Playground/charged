@@ -34,4 +34,4 @@ def color_value(val):
 def render():
     # load data for kpi overview
     df_kpi = load_kpi(st.session_state["shared_df"])
-    st.write(df_kpi.style.applymap(color_value, subset=["KPI"]))
+    st.write(df_kpi.style.map(color_value, subset=["KPI"]))
