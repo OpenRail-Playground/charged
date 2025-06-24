@@ -26,7 +26,10 @@ Create `.env` and update according to the documentation to enable connection to 
 Start dashboard:
 
 ```bash
-make dashboard
+# load data
+uv run python dashboard/preprocess_data.py
+# start dashboard
+uv run streamlit run dashboard/main.py
 ```
 
 ## License

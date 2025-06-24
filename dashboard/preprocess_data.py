@@ -14,25 +14,9 @@ def preprocess_data():
     session = create_session()
 
     table = "BATTERIELOK_DATA"
-    sdf = (
-        session.table(table)
-        .filter(F.col("VEHICLE_ID").isNotNull())
-        .with_column(
-            "TIMESTAMP_TRUNC",
-            F.from_unixtime(
-                F.round(F.unix_timestamp(F.col("TIMESTAMP_VEHICLE")) / 60) * 60
-            ).cast("TIMESTAMP"),
-        )
-    )
+    sdf = session.table(table)
 
-    df = (
-        sdf_cleaned(sdf)
-        .group_by(["VEHICLE_ID", "TIMESTAMP_TRUNC"])
-        .agg(*aggregations())
-        .order_by(["VEHICLE_ID", "TIMESTAMP_TRUNC"], ascending=[True, True])
-        .to_pandas()
-    )
-
+    df = sdf_cleaned(sdf).to_pandas()
     df.to_parquet("data/clean_data.parquet")
 
 
@@ -40,6 +24,7 @@ def sdf_cleaned(sdf):
     return (
         sdf.filter(F.to_date(F.col("TIMESTAMP_VEHICLE")) >= "2025-03-01")
         .filter(F.to_date(F.col("TIMESTAMP_KAFKA")) >= "2025-03-01")
+        .filter(F.col("VEHICLE_ID").isNotNull())
         .filter(F.col("LIFESIGN") >= -32768)
         .filter(F.col("LIFESIGN") <= 32767)
         .filter(F.col("VEHICLE_GPS_Y") <= 48)
@@ -98,36 +83,6 @@ def sdf_cleaned(sdf):
         )
         .with_column("ERROR_SIZE", F.size(F.col("ERRORS")))
     )
-
-
-def metrics():
-    return [
-        "VEHICLE_OUTSIDE_TEMP",
-        "BATTERY_SOC",
-        "BATTERY_SOH",
-        "BATTERY_COOLING_TEMP",
-        "BATTERY_1_TEMP",
-        "BATTERY_1_VOLTAGE",
-        "BATTERY_1_CURRENT",
-        "BATTERY_2_TEMP",
-        "BATTERY_2_VOLTAGE",
-        "BATTERY_2_CURRENT",
-        "BATTERY_3_TEMP",
-        "BATTERY_3_VOLTAGE",
-        "BATTERY_3_CURRENT",
-        "BATTERY_4_TEMP",
-        "BATTERY_4_VOLTAGE",
-        "BATTERY_4_CURRENT",
-        "BATTERY_5_VOLTAGE",
-    ]
-
-
-# groupby vehicle and 60 sec
-def aggregations():
-    aggregations = []
-    for column in metrics():
-        aggregations.append(F.avg(F.col(column)).alias(f"{column}_AVG"))
-    return aggregations
 
 
 if __name__ == "__main__":
