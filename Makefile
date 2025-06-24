@@ -16,7 +16,10 @@ uvx_exists: ; @which uvx > /dev/null
 is_git: ; @git rev-parse --git-dir > /dev/null
 
 notebook:
-	uv run python -m notebook
+	uv run --with jupyter jupyter lab
 
 strip:
 	find . -name '*.ipynb' -exec uv run nbstripout {} +
+
+dashboard:
+	uv run streamlit run streamlit/dashboard.py
