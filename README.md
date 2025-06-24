@@ -14,7 +14,20 @@ This project has been initiated during the [Hack4Rail 2025](https://hack4rail.ev
 
 ## Install
 
-*How can a user install the software?*
+Install virtual environment for Python using `uv`.
+
+```bash
+make
+```
+
+Create `.env` and update according to the documentation to enable connection to Snowflake database.
+
+
+Start dashboard:
+
+```bash
+make dashboard
+```
 
 ## License
 
