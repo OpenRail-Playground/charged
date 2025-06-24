@@ -1,5 +1,34 @@
-def render():
-    import streamlit as st
+import streamlit as st
+import plotly.graph_objects as go
 
-    # st.header("Tab 1")
-    st.write("This is the content of Tab 5.")
+
+def load_capacity(df):
+    df_result = (
+        df.groupby("VEHICLE_ID")
+        .agg(BATTERY_SOH_AVG=("BATTERY_SOH", "mean"), SOC=("BATTERY_SOC", "mean"))
+        .assign(
+            CAPACITY=lambda x: x["BATTERY_SOH_AVG"].apply(lambda soh: soh * 1.056),
+        )
+    )
+    df_result["AVAILABLE"] = df_result["SOC"] * df_result["CAPACITY"] / 100
+
+    return df_result.reset_index()[["VEHICLE_ID", "CAPACITY", "SOC", "AVAILABLE"]]
+
+
+def render():
+    # load data for capacity overview
+    df_capacity = load_capacity(st.session_state["shared_df"])
+    st.write(df_capacity)
+
+    fig = go.Figure(
+        go.Indicator(
+            mode="number+delta+gauge",
+            value=433,
+            delta={"reference": 431},
+            gauge={"axis": {"visible": False}},
+            domain={"row": 0, "column": 0},
+        )
+    )
+
+    # Show plot
+    st.plotly_chart(fig, use_container_width=True)
