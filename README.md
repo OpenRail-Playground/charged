@@ -1,6 +1,8 @@
 # Charged
 
-*Short description what the project is about*
+Hack4Rail 2025
+
+Challenge 9: Monitoring and management of railway vehicle batteries.
 
 ## Background
 
