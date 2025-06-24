@@ -14,7 +14,8 @@ def render():
     df = st.session_state["shared_df"]
     df["min_5"] = df["TIMESTAMP_VEHICLE"].dt.floor("5min")
     df["size"] = 15
-    
+    df["DATE"] = df["TIMESTAMP_VEHICLE"].dt.strftime("%d-%m-%y %H:%M")
+
     # Create the appropriate visualization based on the selected option
     if visualization_type == "by errors":
         color = "ERRORS"
@@ -31,9 +32,8 @@ def render():
         width=1200,
         height=600,
         zoom=9,
-        hover_data=["VEHICLE_GPS_SPEED", "BATTERY_SOC"],
+        hover_data=["VEHICLE_GPS_SPEED", "BATTERY_SOC", "DATE"],
         map_style="open-street-map",
         color_discrete_sequence=px.colors.qualitative.Plotly
     )
     st.plotly_chart(fig, use_container_width=True)
-
