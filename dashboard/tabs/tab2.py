@@ -18,6 +18,7 @@ def render():
     # Create the appropriate visualization based on the selected option
     if visualization_type == "by errors":
         color = "ERRORS"
+        df = df[df["ERRORS"] != "[]"]
     else:
         color = "VEHICLE_ID"
 
@@ -31,8 +32,6 @@ def render():
         height=600,
         zoom=9,
         hover_data=["VEHICLE_GPS_SPEED", "BATTERY_SOC"],
-        # map_style="dark",
-        # map_style="carto-darkmatter",
         map_style="open-street-map",
         color_discrete_sequence=px.colors.qualitative.Plotly
     )
