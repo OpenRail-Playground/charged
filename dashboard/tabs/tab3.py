@@ -53,11 +53,10 @@ def render():
         x="TIMESTAMP_TRUNC",
         y=parameter,
         markers=True,
-        facet_row="VEHICLE_ID",
+        color="VEHICLE_ID",
+        color_discrete_sequence=px.colors.qualitative.Plotly,
         render_mode="svg",
     )
-    # free scale on y axis
-    fig.update_yaxes(matches=None, showticklabels=True)
 
     # Show plot
     st.plotly_chart(fig, use_container_width=True)

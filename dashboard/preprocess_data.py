@@ -21,26 +21,48 @@ def preprocess_data():
 
 
 def sdf_cleaned(sdf):
-    return (
-        sdf.filter(F.to_date(F.col("TIMESTAMP_VEHICLE")) >= "2025-03-01")
+    update_columns = [
+        "VEHICLE_GPS_X",
+        "VEHICLE_GPS_Y",
+        "VEHICLE_GPS_Z",
+    ]
+
+    sdf_updated = sdf.select(
+        *[
+            F.when(F.col(column) == 0, None).otherwise(F.col(column)).alias(column)
+            if column in update_columns
+            else F.col(column).alias(column)
+            for column in sdf.schema.names
+        ]
+    )
+
+    sdf_clean = (
+        sdf_updated.filter(F.to_date(F.col("TIMESTAMP_VEHICLE")) >= "2025-03-01")
         .filter(F.to_date(F.col("TIMESTAMP_KAFKA")) >= "2025-03-01")
         .filter(F.col("VEHICLE_ID").isNotNull())
-        .filter(F.col("LIFESIGN") >= -32768)
-        .filter(F.col("LIFESIGN") <= 32767)
-        .filter(F.col("VEHICLE_GPS_Y") <= 48)
-        .filter(F.col("VEHICLE_GPS_Y") >= 45.6)
-        .filter(F.col("VEHICLE_GPS_X") <= 10.7)
-        .filter(F.col("VEHICLE_GPS_X") >= 5.7)
-        .filter(F.col("VEHICLE_GPS_Z") <= 1500)
-        .filter(F.col("VEHICLE_GPS_Z") >= 0)
+        .filter(
+            (F.col("LIFESIGN") >= -32768) & (F.col("LIFESIGN") <= 65535)
+            | (F.col("LIFESIGN").isNull())
+        )
+        .filter(
+            (F.col("VEHICLE_GPS_Y") <= 48) & (F.col("VEHICLE_GPS_Y") >= 45.6)
+            | (F.col("VEHICLE_GPS_Y").isNull())
+        )
+        .filter(
+            (F.col("VEHICLE_GPS_X") <= 10.7) & (F.col("VEHICLE_GPS_X") >= 5.7)
+            | (F.col("VEHICLE_GPS_X").isNull())
+        )
+        .filter(
+            (F.col("VEHICLE_GPS_Z") <= 1500) & (F.col("VEHICLE_GPS_Z") >= 0)
+            | (F.col("VEHICLE_GPS_Z").isNull())
+        )
         .filter(F.col("VEHICLE_GPS_SPEED") >= 0)
         .filter(F.col("VEHICLE_GPS_SPEED") <= 100)
         .filter(F.col("VEHICLE_SPEED") >= -100)
         .filter(F.col("VEHICLE_SPEED") <= 100)
         .filter(F.col("VEHICLE_OUTSIDE_TEMP") >= -40)
         .filter(F.col("VEHICLE_OUTSIDE_TEMP") <= 60)
-        .filter(F.col("CHARGER_POWER") >= 0)
-        .filter(F.col("CHARGER_POWER") <= 25)
+        # .filter((F.col("CHARGER_POWER") >= 0) & (F.col("CHARGER_POWER") <= 25) | (F.col("CHARGER_POWER").isNull()))
         .filter(F.col("POWER_1_TRACTION") >= 0)
         .filter(F.col("POWER_1_TRACTION") <= 150)
         .filter(F.col("POWER_COMPRESSOR") >= 0)
@@ -83,6 +105,7 @@ def sdf_cleaned(sdf):
         )
         .with_column("ERROR_SIZE", F.size(F.col("ERRORS")))
     )
+    return sdf_clean
 
 
 if __name__ == "__main__":
