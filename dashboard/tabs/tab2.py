@@ -32,8 +32,8 @@ def render():
         zoom=9,
         hover_data=["VEHICLE_GPS_SPEED", "BATTERY_SOC"],
         # map_style="dark",
-        map_style="carto-darkmatter",
-        # map_style="open-street-map",
+        # map_style="carto-darkmatter",
+        map_style="open-street-map",
         color_discrete_sequence=px.colors.qualitative.Plotly
     )
     st.plotly_chart(fig, use_container_width=True)
