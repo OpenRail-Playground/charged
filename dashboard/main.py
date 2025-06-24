@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 def main():
     st.set_page_config(page_title="Charged", layout="wide")
     st.title("Charged - Battery Monitoring")
-    df_full = load_data()
 
     # Create date selector with default values (today and 7 days ago)
     default_end = datetime.now().date()
@@ -17,14 +16,8 @@ def main():
     def update_filtered_dataframe():
         if len(st.session_state.date_range) == 2:
             start_date, end_date = st.session_state.date_range
-            filtered_df = df_full[
-                (df_full["TIMESTAMP_VEHICLE"].dt.date >= start_date)
-                & (df_full["TIMESTAMP_VEHICLE"].dt.date <= end_date)
-            ]
-        else:
-            filtered_df = df_full
-        
-        st.session_state["shared_df"] = filtered_df
+            df = load_data(start_date=start_date, end_date=end_date)        
+            st.session_state["shared_df"] = df
     
     # Create two columns for date picker and tabs
     date_col, _ = st.columns([1, 3])
