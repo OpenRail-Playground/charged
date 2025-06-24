@@ -1,0 +1,134 @@
+# Run this file with
+# python dashboard/preprocess_data.py
+
+from dotenv import load_dotenv
+from charged.snowflake_utils import create_session
+import snowflake.snowpark.functions as F
+
+
+def preprocess_data():
+    # load environment variables from .env file
+    load_dotenv()
+
+    # create snowpark session
+    session = create_session()
+
+    table = "BATTERIELOK_DATA"
+    sdf = (
+        session.table(table)
+        .filter(F.col("VEHICLE_ID").isNotNull())
+        .with_column(
+            "TIMESTAMP_TRUNC",
+            F.from_unixtime(
+                F.round(F.unix_timestamp(F.col("TIMESTAMP_VEHICLE")) / 60) * 60
+            ).cast("TIMESTAMP"),
+        )
+    )
+
+    df = (
+        sdf_cleaned(sdf)
+        .group_by(["VEHICLE_ID", "TIMESTAMP_TRUNC"])
+        .agg(*aggregations())
+        .order_by(["VEHICLE_ID", "TIMESTAMP_TRUNC"], ascending=[True, True])
+        .to_pandas()
+    )
+
+    df.to_parquet("data/clean_data.parquet")
+
+
+def sdf_cleaned(sdf):
+    return (
+        sdf.filter(F.to_date(F.col("TIMESTAMP_VEHICLE")) >= "2025-03-01")
+        .filter(F.to_date(F.col("TIMESTAMP_KAFKA")) >= "2025-03-01")
+        .filter(F.col("LIFESIGN") >= -32768)
+        .filter(F.col("LIFESIGN") <= 32767)
+        .filter(F.col("VEHICLE_GPS_Y") <= 48)
+        .filter(F.col("VEHICLE_GPS_Y") >= 45.6)
+        .filter(F.col("VEHICLE_GPS_X") <= 10.7)
+        .filter(F.col("VEHICLE_GPS_X") >= 5.7)
+        .filter(F.col("VEHICLE_GPS_Z") <= 1500)
+        .filter(F.col("VEHICLE_GPS_Z") >= 0)
+        .filter(F.col("VEHICLE_GPS_SPEED") >= 0)
+        .filter(F.col("VEHICLE_GPS_SPEED") <= 100)
+        .filter(F.col("VEHICLE_SPEED") >= -100)
+        .filter(F.col("VEHICLE_SPEED") <= 100)
+        .filter(F.col("VEHICLE_OUTSIDE_TEMP") >= -40)
+        .filter(F.col("VEHICLE_OUTSIDE_TEMP") <= 60)
+        .filter(F.col("CHARGER_POWER") >= 0)
+        .filter(F.col("CHARGER_POWER") <= 25)
+        .filter(F.col("POWER_1_TRACTION") >= 0)
+        .filter(F.col("POWER_1_TRACTION") <= 150)
+        .filter(F.col("POWER_COMPRESSOR") >= 0)
+        .filter(F.col("POWER_COMPRESSOR") <= 8)
+        .filter(F.col("POWER_4") >= 0)
+        .filter(F.col("POWER_4") <= 30)
+        .filter(F.col("BATTERY_SOC") >= 0)
+        .filter(F.col("BATTERY_SOC") <= 100)
+        .filter(F.col("BATTERY_SOH") >= 0)
+        .filter(F.col("BATTERY_SOH") <= 100)
+        .filter(F.col("BATTERY_COOLING_TEMP") >= 0)
+        .filter(F.col("BATTERY_COOLING_TEMP") <= 45)
+        .filter(F.col("BATTERY_1_TEMP") >= -20)
+        .filter(F.col("BATTERY_1_TEMP") <= 45)
+        .filter(F.col("BATTERY_1_VOLTAGE") >= 540)
+        .filter(F.col("BATTERY_1_VOLTAGE") <= 756)
+        .filter(F.col("BATTERY_1_CURRENT") >= -200)
+        .filter(F.col("BATTERY_1_CURRENT") <= 200)
+        .filter(F.col("BATTERY_2_TEMP") >= -30)
+        .filter(F.col("BATTERY_2_TEMP") <= 60)
+        .filter(F.col("BATTERY_2_VOLTAGE") >= 540)
+        .filter(F.col("BATTERY_2_VOLTAGE") <= 756)
+        .filter(F.col("BATTERY_2_CURRENT") >= -200)
+        .filter(F.col("BATTERY_2_CURRENT") <= 200)
+        .filter(F.col("BATTERY_3_TEMP") >= -20)
+        .filter(F.col("BATTERY_3_TEMP") <= 45)
+        .filter(F.col("BATTERY_3_VOLTAGE") >= 540)
+        .filter(F.col("BATTERY_3_VOLTAGE") <= 756)
+        .filter(F.col("BATTERY_3_CURRENT") >= -200)
+        .filter(F.col("BATTERY_3_CURRENT") <= 200)
+        .with_column(
+            "TIMESTAMP_TRUNC",
+            F.from_unixtime(
+                F.round(F.unix_timestamp(F.col("TIMESTAMP_VEHICLE")) / 60) * 60
+            ).cast("TIMESTAMP"),
+        )
+        .with_column(
+            "DATE",
+            F.date_trunc("DAY", "TIMESTAMP_VEHICLE").cast("DATE"),
+        )
+        .with_column("ERROR_SIZE", F.size(F.col("ERRORS")))
+    )
+
+
+def metrics():
+    return [
+        "VEHICLE_OUTSIDE_TEMP",
+        "BATTERY_SOC",
+        "BATTERY_SOH",
+        "BATTERY_COOLING_TEMP",
+        "BATTERY_1_TEMP",
+        "BATTERY_1_VOLTAGE",
+        "BATTERY_1_CURRENT",
+        "BATTERY_2_TEMP",
+        "BATTERY_2_VOLTAGE",
+        "BATTERY_2_CURRENT",
+        "BATTERY_3_TEMP",
+        "BATTERY_3_VOLTAGE",
+        "BATTERY_3_CURRENT",
+        "BATTERY_4_TEMP",
+        "BATTERY_4_VOLTAGE",
+        "BATTERY_4_CURRENT",
+        "BATTERY_5_VOLTAGE",
+    ]
+
+
+# groupby vehicle and 60 sec
+def aggregations():
+    aggregations = []
+    for column in metrics():
+        aggregations.append(F.avg(F.col(column)).alias(f"{column}_AVG"))
+    return aggregations
+
+
+if __name__ == "__main__":
+    preprocess_data()
