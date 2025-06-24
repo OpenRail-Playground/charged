@@ -1,14 +1,45 @@
 import streamlit as st
-from tabs import tab1, tab2
+from tabs import tab1, tab2, tab3, tab4, tab5
 from load_data import load_data
+from datetime import datetime, timedelta
 
 
 def main():
     st.set_page_config(page_title="Charged", layout="wide")
-    st.title("Hello World Streamlit App")
+    st.title("Charged - Battery Monitoring")
+    df_full = load_data()
+
+    # Create date selector with default values (today and 7 days ago)
+    default_end = datetime.now().date()
+    default_start = default_end - timedelta(days=7)
+
+    # Function to update shared dataframe when date changes
+    def update_filtered_dataframe():
+        if len(st.session_state.date_range) == 2:
+            start_date, end_date = st.session_state.date_range
+            filtered_df = df_full[
+                (df_full["TIMESTAMP_VEHICLE"].dt.date >= start_date)
+                & (df_full["TIMESTAMP_VEHICLE"].dt.date <= end_date)
+            ]
+        else:
+            filtered_df = df_full
+        
+        st.session_state["shared_df"] = filtered_df
+    
+    # Create two columns for date picker and tabs
+    date_col, _ = st.columns([1, 3])
+
+    with date_col:
+        st.date_input(
+            "Select Date Range", 
+            value=(default_start, default_end), 
+            key="date_range",
+            on_change=update_filtered_dataframe
+        )
+    
     # Initialize shared dataframe in session state if not present
     if "shared_df" not in st.session_state:
-        st.session_state["shared_df"] = load_data()
+        update_filtered_dataframe()
     tabs = st.tabs(["Overview", "Map", "Time Series", "Errors", "Capacity"])
     mapping = {
         "Overview": "KPI overview",
@@ -25,13 +56,13 @@ def main():
         tab2.render()
     with tabs[2]:
         st.subheader(mapping["TimeSeries"])
-        tab2.render()
+        tab3.render()
     with tabs[3]:
         st.subheader(mapping["Errors"])
-        tab2.render()
+        tab4.render()
     with tabs[4]:
         st.subheader(mapping["Capacity"])
-        tab2.render()
+        tab5.render()
 
 
 if __name__ == "__main__":
