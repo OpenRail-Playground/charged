@@ -102,12 +102,80 @@ def render_map():
 
 # Overview tab ###################
 @st.cache_data()
-def load_overview_data():
-    pass
+def load_overview_data(date_range: Dict):
+    """Filter raw table."""
+    _session = create_session()
+
+    # prepare for aggregation
+    aggregations = []
+    for column in columns:
+        aggregations.append(F.avg(F.col(column)).alias(f"{column}_AVG"))
+
+    # get pandas dataframe
+    df = (
+        _session.table(table)
+        .filter(F.to_date(F.col("TIMESTAMP_VEHICLE")) >= date_range["date_from"])
+        .filter(F.to_date(F.col("TIMESTAMP_VEHICLE")) <= date_range["date_to"])
+        .filter(F.col("VEHICLE_ID").isNotNull())
+        .with_column(
+            "TIMESTAMP_TRUNC",
+            F.from_unixtime(
+                F.round(F.unix_timestamp(F.col("TIMESTAMP_VEHICLE")) / 60) * 60
+            ).cast("TIMESTAMP"),
+        )
+        .with_column(
+            "DATE",
+            F.date_trunc("DAY", "TIMESTAMP_VEHICLE").cast("DATE"),
+        )
+        .with_column("ERROR_SIZE", F.size(F.col("ERRORS")))
+        .to_pandas()
+    )
+
+    # pandas df for
+    # Assuming `df` is your Pandas DataFrame equivalent to `sdf`
+    df_result = (
+        df.groupby("VEHICLE_ID")
+        .agg(BATTERY_SOH_AVG=("BATTERY_SOH", "mean"), ERROR_COUNT=("ERROR_SIZE", "sum"))
+        .assign(
+            ERROR_STATE=lambda x: x["ERROR_COUNT"].apply(
+                lambda count: 1 if count > 0 else 0
+            ),
+            SOH_STATE=lambda x: x["BATTERY_SOH_AVG"].apply(
+                lambda soh: 0 if soh > 95 else (0.5 if soh > 50 else 0)
+            ),
+        )
+    )
+
+    df_result["KPI"] = df_result["ERROR_STATE"] + df_result["SOH_STATE"]
+
+    df_result = df_result.sort_values("KPI", ascending=False)
+
+    return df_result.reset_index()[
+        ["VEHICLE_ID", "KPI", "BATTERY_SOH_AVG", "ERROR_COUNT"]
+    ]
 
 
-def render_overview():
-    pass
+# def color_row(row):
+# if row['KPI'] > 1:
+#     return ['background-color: red'] * len(row)
+# elif row['KPI'] < 0.5:
+#     return ['background-color: green'] * len(row)
+# else:
+#     return ['background-color: orange'] * len(row)
+
+
+def color_value(val):
+    if val > 1:
+        return "background-color: red"
+    elif val < 0.5:
+        return "background-color: green"
+    else:
+        return "background-color: orange"
+
+
+def render_overview(df):
+    # st.write(df.style.apply(color_value, subset=['KPI'], axis=1))
+    st.write(df.style.applymap(color_value, subset=["KPI"]))
 
 
 # Error tab ###################
@@ -155,8 +223,8 @@ def main():
             df = load_map_data()
             render_map()
         with tab_overview:
-            df = load_overview_data()
-            render_overview()
+            df = load_overview_data(date_range)
+            render_overview(df)
         with tab_error:
             df = load_error_data()
             render_error()
