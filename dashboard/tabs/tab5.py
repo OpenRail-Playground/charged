@@ -6,11 +6,17 @@ def load_capacity(df):
     df_result = df.drop_duplicates(subset=["VEHICLE_ID"], keep="last")
     df_result["AVAILABLE"] = df_result["BATTERY_SOC"] * 1.056
 
-    return df_result.reset_index()[["VEHICLE_ID", "AVAILABLE"]]
+    df_result = df_result.reset_index()[["VEHICLE_ID", "AVAILABLE"]]
+
+    df_result.columns = {
+        "Vehicle ID": df_result["VEHICLE_ID"],
+        "Available energy [kWh]": df_result["AVAILABLE"],
+    }
+    return df_result
 
 
 def sum_capacity(df):
-    return df["AVAILABLE"].sum()
+    return df["Available energy [kWh]"].sum()
 
 
 def render():
@@ -24,6 +30,7 @@ def render():
             value=df_overall_capacitiy,
             gauge={"axis": {"visible": False}},
             domain={"row": 0, "column": 0},
+            title="Available fleet energy [kWh]",
         )
     )
 

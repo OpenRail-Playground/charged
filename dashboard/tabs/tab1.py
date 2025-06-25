@@ -1,8 +1,9 @@
 import streamlit as st
+import pandas as pd
 
 
 def load_kpi(df):
-    df_result = (
+    df_result: pd.DataFrame = (
         df.groupby("VEHICLE_ID")
         .agg(BATTERY_SOH_AVG=("BATTERY_SOH", "mean"), ERROR_COUNT=("ERROR_SIZE", "sum"))
         .assign(
@@ -17,9 +18,13 @@ def load_kpi(df):
     df_result["KPI"] = df_result["ERROR_STATE"] + df_result["SOH_STATE"]
     df_result = df_result.sort_values("KPI", ascending=False)
 
-    return df_result.reset_index()[
+    df_result = df_result.reset_index()[
         ["VEHICLE_ID", "KPI", "BATTERY_SOH_AVG", "ERROR_COUNT"]
     ]
+
+    df_result.columns = ["Vehicle ID", "KPI", "Battery SOH Avg. [%]", "Error Count"]
+
+    return df_result
 
 
 def color_value(val):

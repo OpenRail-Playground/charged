@@ -5,11 +5,9 @@ import plotly.express as px
 def render():
     # Add radio button to select visualization type
     visualization_type = st.radio(
-        "Visualization type:",
-        options=["by vehicle", "by errors"],
-        horizontal=True
+        "Visualization type:", options=["by vehicle", "by errors"], horizontal=True
     )
-    
+
     # Prepare data
     df = st.session_state["shared_df"]
     df["min_5"] = df["TIMESTAMP_VEHICLE"].dt.floor("5min")
@@ -34,6 +32,7 @@ def render():
         zoom=9,
         hover_data=["VEHICLE_GPS_SPEED", "BATTERY_SOC", "DATE"],
         map_style="open-street-map",
-        color_discrete_sequence=px.colors.qualitative.Plotly
+        color_discrete_sequence=px.colors.qualitative.Plotly,
+        labels={"VEHICLE_ID": "Vehicle Id"},
     )
     st.plotly_chart(fig, use_container_width=True)
