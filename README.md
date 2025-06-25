@@ -1,34 +1,36 @@
 # Charged
 
-Hack4Rail 2025
+Challenge 9: **Monitoring and management of railway vehicle batteries**.
 
-Challenge 9: Monitoring and management of railway vehicle batteries.
+<p align="center">
+  <img alt="Charged: Battery Monitoring" src="img/charged_screenshot.png" width="400"/>
+</p>
 
 ## Background
 
 <p align="center">
-  <img alt="Hack4Rail Logo" src="img/hack4rail-logo.jpg" width="220"/>
+  <img alt="Hack4Rail Logo" src="img/hack4rail-logo.jpg" width="150"/>
 </p>
 
 This project has been initiated during the [Hack4Rail 2025](https://hack4rail.event.sbb.ch/en/), a joint hackathon organised by the railway companies SBB, ÖBB, and DB in partnership with the OpenRail Association.
 
 ## Install
 
-Install virtual environment for Python using `uv`.
+Install virtual environment for Python:
 
 ```bash
 make
 ```
 
-Create `.env` and update according to the documentation to enable connection to Snowflake database.
+Create `.env` and update according to the documentation to enable database connection.
 
 
 Start dashboard:
 
 ```bash
-# load data
+# load data from database to local parquet file.
 uv run python dashboard/preprocess_data.py
-# start dashboard
+# run stramlit dashboard
 uv run streamlit run dashboard/main.py
 ```
 
