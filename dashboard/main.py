@@ -16,30 +16,30 @@ def main():
     def update_filtered_dataframe():
         if len(st.session_state.date_range) == 2:
             start_date, end_date = st.session_state.date_range
-            df = load_data(start_date=start_date, end_date=end_date)        
+            df = load_data(start_date=start_date, end_date=end_date)
             st.session_state["shared_df"] = df
-    
+
     # Create two columns for date picker and tabs
     date_col, _ = st.columns([1, 3])
 
     with date_col:
         st.date_input(
-            "Select Date Range", 
-            value=(default_start, default_end), 
+            "Select Date Range",
+            value=(default_start, default_end),
             key="date_range",
-            on_change=update_filtered_dataframe
+            on_change=update_filtered_dataframe,
         )
-    
+
     # Initialize shared dataframe in session state if not present
     if "shared_df" not in st.session_state:
         update_filtered_dataframe()
-    tabs = st.tabs(["Overview", "Map", "Time Series", "Errors", "Capacity"])
+    tabs = st.tabs(["Overview", "Map", "Time Series", "Errors", "Available Energy"])
     mapping = {
         "Overview": "KPI overview",
         "Map": "Map",
         "TimeSeries": "Time Series",
         "Errors": "Errors",
-        "Capacity": "Capacity",
+        "Capacity": "Available Energy",
     }
     with tabs[0]:
         st.subheader(mapping["Overview"])
