@@ -9,5 +9,5 @@ def load_data(start_date=None, end_date=None):
         ]
     else:
         filters = None
-    df = pd.read_parquet("data/clean_data.parquet", filters=filters, engine="pyarrow")
+    df = pd.read_parquet("data/clean_data_minute.parquet", filters=filters, engine="pyarrow")
     return df
