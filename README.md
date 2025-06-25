@@ -3,7 +3,7 @@
 Challenge 9: **Monitoring and management of railway vehicle batteries**.
 
 <p align="center">
-  <img alt="Charged: Battery Monitoring" src="img/charged_screenshot.png" width="400"/>
+  <img alt="Charged: Battery Monitoring" src="img/charged_screenshot.png" width="800"/>
 </p>
 
 ## Background
