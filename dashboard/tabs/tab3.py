@@ -4,10 +4,10 @@ import plotly.express as px
 
 def get_columns():
     return [
+        "BATTERY_COOLING_TEMP",
         "VEHICLE_OUTSIDE_TEMP",
         "BATTERY_SOC",
         "BATTERY_SOH",
-        "BATTERY_COOLING_TEMP",
         "BATTERY_1_TEMP",
         "BATTERY_1_VOLTAGE",
         "BATTERY_1_CURRENT",

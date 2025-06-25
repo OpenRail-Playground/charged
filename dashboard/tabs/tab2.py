@@ -29,7 +29,7 @@ def render():
         size="size",
         width=1200,
         height=600,
-        zoom=9,
+        zoom=7,
         hover_data=["VEHICLE_GPS_SPEED", "BATTERY_SOC", "DATE"],
         map_style="open-street-map",
         color_discrete_sequence=px.colors.qualitative.Plotly,

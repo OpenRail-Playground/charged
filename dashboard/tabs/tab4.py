@@ -1,23 +1,21 @@
+import streamlit as st
+import plotly.express as px
+import pandas as pd
+
 def render():
-    import streamlit as st
-    import pandas as pd
 
     sdf: pd.DataFrame = st.session_state["shared_df"]
 
-    filtered_df = sdf[sdf["ERROR_SIZE"] > 0]
-    grouped_df = (
-        filtered_df.groupby(["VEHICLE_ID", "DATE"]).size().reset_index(name="count")
-    )
-    ordered_df = grouped_df.sort_values(
-        by=["VEHICLE_ID", "DATE"], ascending=[True, True]
-    )
+    dfn = sdf[["VEHICLE_ID", "ERROR_SIZE", "TIMESTAMP_VEHICLE"]]
+    # Create a new column with just the date component (without time)
+    dfn["DATE"] = dfn["TIMESTAMP_VEHICLE"].dt.date
 
-    ordered_df.columns = {
-        "Vehicle ID": ordered_df["VEHICLE_ID"],
-        "Date": ordered_df["DATE"],
-        "Count": ordered_df["count"],
-    }
+    # Group by DATE and VEHICLE_ID, summing the ERROR_SIZE
+    daily_errors = dfn.groupby(["DATE", "VEHICLE_ID"])["ERROR_SIZE"].sum().reset_index()
 
-    st.bar_chart(ordered_df, x="Date", y="Count", y_label="Number of Errors")
-
-    st.write(ordered_df)
+    # Convert DATE back to datetime for proper plotting
+    daily_errors["DATE"] = pd.to_datetime(daily_errors["DATE"])
+    # Create bar chart showing daily error sizes by vehicle
+    fig = px.bar(daily_errors, y="ERROR_SIZE", x="DATE", color="VEHICLE_ID", barmode="stack",
+                title="Daily Aggregated Error Size by Vehicle")
+    st.plotly_chart(fig, use_container_width=True)
