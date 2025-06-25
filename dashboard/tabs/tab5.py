@@ -12,7 +12,15 @@ def load_capacity(df):
     )
     df_result["AVAILABLE"] = df_result["SOC"] * df_result["CAPACITY"] / 100
 
-    return df_result.reset_index()[["VEHICLE_ID", "CAPACITY", "SOC", "AVAILABLE"]]
+    df_result = df_result.reset_index()[["VEHICLE_ID", "CAPACITY", "SOC", "AVAILABLE"]]
+
+    df_result.columns = {
+        "Vehicle ID": df_result["VEHICLE_ID"],
+        "Capacity": df_result["CAPACITY"],
+        "SOC": df_result["SOC"],
+        "Available": df_result["AVAILABLE"],
+    }
+    return df_result
 
 
 def render():

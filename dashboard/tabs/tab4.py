@@ -12,8 +12,12 @@ def render():
         by=["VEHICLE_ID", "DATE"], ascending=[True, True]
     )
 
-    st.bar_chart(
-        ordered_df, x="DATE", y="count", x_label="Date", y_label="Number of Errors"
-    )
+    ordered_df.columns = {
+        "Vehicle ID": ordered_df["VEHICLE_ID"],
+        "Date": ordered_df["DATE"],
+        "Count": ordered_df["count"],
+    }
+
+    st.bar_chart(ordered_df, x="Date", y="Count", y_label="Number of Errors")
 
     st.write(ordered_df)

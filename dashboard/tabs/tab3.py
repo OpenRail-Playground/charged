@@ -20,8 +20,31 @@ def get_columns():
         "BATTERY_4_TEMP",
         "BATTERY_4_VOLTAGE",
         "BATTERY_4_CURRENT",
-        "BATTERY_5_VOLTAGE",
     ]
+
+
+def get_labels():
+    return {
+        "VEHICLE_OUTSIDE_TEMP": "Vehicle outside temperature [°C]",
+        "TIMESTAMP_TRUNC": "Date",
+        "ERRORS": "Errors",
+        "BATTERY_SOC": "Battery SOC [%]",
+        "BATTERY_SOH": "Battery SOH [%]",
+        "BATTERY_COOLING_TEMP": "Battery cooling liquid temperature [°C]",
+        "VEHICLE_ID": "Vehicle Id",
+        "BATTERY_1_TEMP": "Battery 1 temperature [°C]",
+        "BATTERY_1_VOLTAGE": "Battery 1 voltage [V]",
+        "BATTERY_1_CURRENT": "Battery 1 current [A]",
+        "BATTERY_2_TEMP": "Battery 2 temperature [°C]",
+        "BATTERY_2_VOLTAGE": "Battery 2 voltage [V]",
+        "BATTERY_2_CURRENT": "Battery 2 current [A]",
+        "BATTERY_3_TEMP": "Battery 3 temperature [°C]",
+        "BATTERY_3_VOLTAGE": "Battery 3 voltage [V]",
+        "BATTERY_3_CURRENT": "Battery 3 current [A]",
+        "BATTERY_4_TEMP": "Battery 4 temperature [°C]",
+        "BATTERY_4_VOLTAGE": "Battery 4 voltage [V]",
+        "BATTERY_4_CURRENT": "Battery 4 current [A]",
+    }
 
 
 def load_ts(df):
@@ -42,8 +65,7 @@ def load_ts(df):
 def render():
     # parameter dropdown
     parameter = st.selectbox(
-        "Metrics",
-        get_columns(),
+        "Metrics", get_columns(), format_func=lambda x: f"{get_labels()[x]}"
     )
 
     df_ts = load_ts(st.session_state["shared_df"])
@@ -56,6 +78,7 @@ def render():
         color="VEHICLE_ID",
         color_discrete_sequence=px.colors.qualitative.Plotly,
         render_mode="svg",
+        labels=get_labels(),
     )
 
     # Show plot
