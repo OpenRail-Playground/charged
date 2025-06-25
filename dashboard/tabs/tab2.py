@@ -19,7 +19,7 @@ def render():
     # Create the appropriate visualization based on the selected option
     if visualization_type == "by errors":
         color = "ERRORS"
-        df = df[df["ERRORS"].astype(str) != "''"]
+        df = df[df["ERRORS"] != ""]
     else:
         color = "VEHICLE_ID"
 
