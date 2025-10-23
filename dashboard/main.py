@@ -8,9 +8,9 @@ def main():
     st.set_page_config(page_title="Charged", layout="wide")
     st.title("Charged - Battery Monitoring")
 
-    # Create date selector with default values (today and 7 days ago)
-    default_end = datetime.now().date()
-    default_start = default_end - timedelta(days=7)
+    # Create date selector with default values
+    default_start = datetime(2025, 6, 1).date()
+    default_end = datetime(2025, 8, 1).date()
 
     # Function to update shared dataframe when date changes
     def update_filtered_dataframe():
